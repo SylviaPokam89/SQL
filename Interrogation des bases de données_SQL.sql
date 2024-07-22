@@ -1,5 +1,5 @@
 /*=================================================================================================================================*/
-												  -- INTERROGATION DES TABLES
+						-- INTERROGATION DES TABLES
 /*=================================================================================================================================*/
 
 -- Commande 'SELECT *' pour afficher les informations des tables
@@ -94,7 +94,7 @@ HAVING moyenne > 1000;
 
 
 /*=================================================================================================================================*/
-												  -- JOINTURES DES TABLES
+						-- JOINTURES DES TABLES
 /*=================================================================================================================================*/
 -- rajouter les informations du client dans le tableau vente
 SELECT * FROM ventes AS ve
@@ -127,7 +127,7 @@ GROUP BY Nom, Prenom;
 
 
 /*=================================================================================================================================*/
-												  -- CREATION DES VUES
+                                                  -- CREATION DES VUES
 /*=================================================================================================================================*/
 -- créer une vue des ventes réalisées en 2021
 CREATE VIEW ventes_2021 AS
@@ -135,4 +135,36 @@ SELECT * FROM ventes
 WHERE YEAR(DateVente) = 2021;
 
 
+/*=================================================================================================================================*/
+						-- SOUS-REQUÊTES
+/*=================================================================================================================================*/
 
+-- Quelques exemples avec utilisation de sous-requêtes
+
+-- liste des produits qui n'ont pas été vendus en 2023
+SELECT * FROM produits
+WHERE ProduitID NOT IN (
+                         SELECT ProduitID FROM ventes
+                         WHERE YEAR(DateVente) = "2023");
+
+-- liste des clients qui ont un montant total d'achat supérieur à la moyenne historique des ventes
+SELECT * FROM ventes
+LEFT JOIN clients USING (ClientID)
+WHERE MontantTotal > (SELECT AVG(MontantTotal) FROM ventes);
+
+-- liste des employés qui n'ont réalisé aucune vente durant le mois de décembre 2021
+SELECT * FROM employes
+WHERE EmployeID NOT IN (
+                         SELECT EmployeID FROM ventes
+						 WHERE MONTH(DateVente) = "12" AND YEAR(DateVente) = "2021");
+
+
+-- Clause FROM pour générer des sous-requêtes
+-- exemple: taux de croissance du chiffre d'affaire entre 2021 et 2022
+
+SELECT (CA_2022 - CA_2021)/CA_2021 AS TauxDeCroissance
+FROM 
+	(SELECT SUM(MontantTotal) AS CA_2021
+	FROM ventes WHERE YEAR(DateVente) = 2021) AS temp,
+    (SELECT SUM(MontantTotal) AS CA_2022
+    FROM ventes WHERE YEAR(DateVente) = 2022) AS temp2;
